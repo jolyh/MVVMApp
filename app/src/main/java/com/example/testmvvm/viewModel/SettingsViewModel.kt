@@ -3,7 +3,6 @@ package com.example.testmvvm.viewModel
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testmvvm.data.DataRepository
@@ -14,24 +13,24 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
-sealed class UIEvent {
+sealed class SettingsUIEvent {
     // USER
-    data class UserNameChanged(val name : String) : UIEvent()
-    data class UserEmailChanged(val email : String) : UIEvent()
-    object SubmitUser: UIEvent()
+    data class UserNameChanged(val name : String) : SettingsUIEvent()
+    data class UserEmailChanged(val email : String) : SettingsUIEvent()
+    object SubmitUser: SettingsUIEvent()
 
     // CHANNEL KEY
-    data class ChannelKeyChanged(val key : String) : UIEvent()
-    data class PushEnabledChanged(val isPushEnabled : Boolean) : UIEvent()
-    object SubmitSettings: UIEvent()
+    data class ChannelKeyChanged(val key : String) : SettingsUIEvent()
+    data class PushEnabledChanged(val isPushEnabled : Boolean) : SettingsUIEvent()
+    object SubmitSettings: SettingsUIEvent()
 
     // CLEARING
-    data class ClearUIValue(val key: String) : UIEvent()
-    object ClearUI : UIEvent()
-    object ClearStorage : UIEvent()
+    data class ClearUIValue(val key: String) : SettingsUIEvent()
+    object ClearUI : SettingsUIEvent()
+    object ClearStorage : SettingsUIEvent()
 }
 
-data class UIState(
+data class SettingsUIState(
 
     // USER
     val userName : String = "",
@@ -63,7 +62,7 @@ class SettingsViewModel @Inject constructor(
 
     private val LOG_TAG = "[${this.javaClass.name}]"
 
-    val _uiState : MutableState<UIState> = mutableStateOf(UIState())
+    val _uiState : MutableState<SettingsUIState> = mutableStateOf(SettingsUIState())
 
     init {
         Log.d(LOG_TAG, "init")
@@ -72,41 +71,41 @@ class SettingsViewModel @Inject constructor(
     }
 
     // UI EVENT
-    fun onEvent(event: UIEvent) {
+    fun onEvent(event: SettingsUIEvent) {
         when(event) {
-            is UIEvent.UserNameChanged -> {
+            is SettingsUIEvent.UserNameChanged -> {
                 _uiState.value = _uiState.value.copy(
                     userName = event.name
                 )
             }
-            is UIEvent.UserEmailChanged -> {
+            is SettingsUIEvent.UserEmailChanged -> {
                 _uiState.value = _uiState.value.copy(
                     userEmail = event.email
                 )
             }
-            is UIEvent.SubmitUser -> {
+            is SettingsUIEvent.SubmitUser -> {
                 validateUserInputs()
             }
-            is UIEvent.ChannelKeyChanged -> {
+            is SettingsUIEvent.ChannelKeyChanged -> {
                 _uiState.value = _uiState.value.copy(
                     channelKey = event.key
                 )
             }
-            is UIEvent.PushEnabledChanged -> {
+            is SettingsUIEvent.PushEnabledChanged -> {
                 _uiState.value = _uiState.value.copy(
                     isPushEnabled = event.isPushEnabled
                 )
             }
-            is UIEvent.SubmitSettings -> {
+            is SettingsUIEvent.SubmitSettings -> {
                 validateSettingsInputs()
             }
-            is UIEvent.ClearUIValue -> {
+            is SettingsUIEvent.ClearUIValue -> {
                 clearUIValue(event.key)
             }
-            is UIEvent.ClearUI -> {
+            is SettingsUIEvent.ClearUI -> {
                 clearUI()
             }
-            is UIEvent.ClearStorage -> {
+            is SettingsUIEvent.ClearStorage -> {
                 clearStorage()
             }
             else -> {
@@ -175,10 +174,10 @@ class SettingsViewModel @Inject constructor(
         }
     }
     private fun clearUI(){
-        _uiState.value = UIState()
+        _uiState.value = SettingsUIState()
     }
     private fun clearStorage(){
-        _uiState.value = UIState()
+        _uiState.value = SettingsUIState()
         viewModelScope.launch {
             repository.clearDataRepository()
         }

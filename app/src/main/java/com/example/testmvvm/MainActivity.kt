@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
+import com.example.testmvvm.screen.ChatScreen
 import com.example.testmvvm.screen.SettingsScreen
 import com.example.testmvvm.ui.theme.TestMVVMTheme
+import com.example.testmvvm.viewModel.ChatViewModel
 import com.example.testmvvm.viewModel.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
@@ -36,12 +38,14 @@ class MainActivity() : ComponentActivity() {
         ActivityCompat.requestPermissions(this, requiredPermissions, 0)
 
         val screenViewModel: SettingsViewModel by viewModels()
+        val chatViewModel : ChatViewModel by viewModels()
 
         setContent {
             TestMVVMTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    SettingsScreen(screenViewModel)
+                    //SettingsScreen(screenViewModel)
+                    ChatScreen(chatViewModel)
                 }
             }
         }

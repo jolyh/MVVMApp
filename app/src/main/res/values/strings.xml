@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">testMVVM</string>
+
+    <string name="timestamp_pattern">dd/MM/YYYY\'-\'HH:mm:ss</string>
 </resources>

@@ -16,8 +16,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.testmvvm.viewModel.SettingsViewModel
-import com.example.testmvvm.viewModel.UIEvent
-import com.example.testmvvm.viewModel.UIState
+import com.example.testmvvm.viewModel.SettingsUIEvent
+import com.example.testmvvm.viewModel.SettingsUIState
 import com.example.testmvvm.model.User
 
 @Composable
@@ -30,8 +30,8 @@ fun SettingsScreen(
     Scaffold(
         floatingActionButton = {
             Fab {
-                viewModel.onEvent(UIEvent.SubmitUser)
-                viewModel.onEvent(UIEvent.SubmitSettings)
+                viewModel.onEvent(SettingsUIEvent.SubmitUser)
+                viewModel.onEvent(SettingsUIEvent.SubmitSettings)
             }
         }
     ) { it ->
@@ -42,14 +42,14 @@ fun SettingsScreen(
         ) {
             UserContainer(
                 uiState = uiState,
-                onNameChanged = { viewModel.onEvent(UIEvent.UserNameChanged(it)) },
-                onEmailChanged = { viewModel.onEvent(UIEvent.UserEmailChanged(it)) }
+                onNameChanged = { viewModel.onEvent(SettingsUIEvent.UserNameChanged(it)) },
+                onEmailChanged = { viewModel.onEvent(SettingsUIEvent.UserEmailChanged(it)) }
             )
 
             SettingContainer(
                 uiState = uiState,
-                onChannelKeyChanged = { viewModel.onEvent(UIEvent.ChannelKeyChanged(it)) },
-                onPushChanged = { viewModel.onEvent(UIEvent.PushEnabledChanged(it)) }
+                onChannelKeyChanged = { viewModel.onEvent(SettingsUIEvent.ChannelKeyChanged(it)) },
+                onPushChanged = { viewModel.onEvent(SettingsUIEvent.PushEnabledChanged(it)) }
             )
 
         }
@@ -67,7 +67,7 @@ fun Fab(fabOnClick : () -> Unit) {
 
 @Composable
 fun UserContainer(
-    uiState: MutableState<UIState>,
+    uiState: MutableState<SettingsUIState>,
     onNameChanged : (String) -> Unit,
     onEmailChanged : (String) -> Unit,
 ) {
@@ -78,7 +78,7 @@ fun UserContainer(
 
 @Composable
 fun SettingContainer(
-    uiState: MutableState<UIState>,
+    uiState: MutableState<SettingsUIState>,
     onChannelKeyChanged : (String) -> Unit,
     onPushChanged : (Boolean) -> Unit,
 ){
@@ -89,7 +89,7 @@ fun SettingContainer(
 
 @Composable
 fun UserInput(
-    uiState: MutableState<UIState>,
+    uiState: MutableState<SettingsUIState>,
     onNameChanged : (String) -> Unit,
     onEmailChanged : (String) -> Unit,
 ) {
@@ -115,7 +115,7 @@ fun UserInput(
 
 @Composable
 fun SettingsInput(
-    uiState: MutableState<UIState>,
+    uiState: MutableState<SettingsUIState>,
     onChannelKeyChanged : (String) -> Unit,
     onPushChanged : (Boolean) -> Unit,
 ) {
