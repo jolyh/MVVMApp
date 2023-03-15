@@ -49,18 +49,18 @@ fun MessageComposable(
             .padding(vertical = 8.dp, horizontal = 4.dp)
             .fillMaxWidth(),
         horizontalArrangement =
-        if (message.author === AuthorType.USER) Arrangement.End
+        if (message.author.authorType === AuthorType.USER) Arrangement.End
         else Arrangement.Start
     ) {
         // SPACER if author is user
-        if (message.author === AuthorType.USER)
+        if (message.author.authorType === AuthorType.USER)
             Spacer(modifier = Modifier.fillMaxWidth(0.3f))
         // AUTHOR ICON
-        AuthorIconComposable(authorType = message.author)
+        AuthorIconComposable(authorType = message.author.authorType)
         // AUTHOR NAME + MESSAGE CONTENT
         AuthorNameAndMessageContentComposable(message)
         // SPACER if author is Business
-        if (message.author != AuthorType.USER)
+        if (message.author.authorType != AuthorType.USER)
             Spacer(modifier = Modifier.fillMaxWidth(0.3f))
     }
 }
@@ -87,23 +87,6 @@ private fun AuthorIconComposable(
                 .border(1.5.dp, MaterialTheme.colors.primary, CircleShape)
         )
     }
-}
-
-@Composable
-private fun AuthorName(
-    name : String,
-    authorType: AuthorType
-) {
-    Text(
-        text = name,
-        color =
-        if (authorType == AuthorType.USER)
-            MaterialTheme.colors.primary
-        else
-            MaterialTheme.colors.secondary
-        ,
-        style = MaterialTheme.typography.subtitle2
-    )
 }
 
 @Composable
@@ -142,6 +125,24 @@ private fun AuthorNameAndMessageContentComposable(
         }
     }
 }
+
+@Composable
+private fun AuthorName(
+    name : String,
+    authorType: AuthorType
+) {
+    Text(
+        text = name,
+        color =
+        if (authorType == AuthorType.USER)
+            MaterialTheme.colors.primary
+        else
+            MaterialTheme.colors.secondary
+        ,
+        style = MaterialTheme.typography.subtitle2
+    )
+}
+
 @Composable
 private fun MessageContentComposable(
     message: Message,

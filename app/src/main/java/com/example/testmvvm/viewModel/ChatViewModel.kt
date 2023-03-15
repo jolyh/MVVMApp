@@ -3,12 +3,16 @@ package com.example.testmvvm.viewModel
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testmvvm.conversation.ConversationRepository
+import com.example.testmvvm.data.DataRepository
+import com.example.testmvvm.model.Author
 import com.example.testmvvm.model.Conversation
 import com.example.testmvvm.model.Message
 import com.example.testmvvm.model.MessageContent
+import com.example.testmvvm.navigation.AppDestinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -30,7 +34,9 @@ sealed class ChatUIEvent {
 
 data class ChatUIState(
 
-    val conversation: Conversation = Conversation("0"),
+    val conversation: Conversation = Conversation(),
+    val localAuthor : Author = Author(),
+
     val composerValue : String = "",
     val composerVisible: Boolean = true,
 
@@ -43,14 +49,16 @@ data class ChatUIState(
     }
 }
 
-/* TODO NEED to implement the conversation ID on navigation so we open the appropriate one
+/*
+   TODO NEED to implement the conversation ID on navigation so we open the appropriate one
     Default implementation should have empty conversation
  */
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val repository: ConversationRepository,
-    //private val conversationId: String = "1"
+    private val conversationRepository: ConversationRepository,
+    private val dataRepository: DataRepository,
+    private val savedState : SavedStateHandle
     ) : ViewModel() {
 
     private val LOG_TAG = "[${this.javaClass.name}]"
@@ -59,7 +67,14 @@ class ChatViewModel @Inject constructor(
 
     init {
         Log.d(LOG_TAG, "init")
-        fetchOrCreateConversation("0")
+        val chatId = savedState.get<String>(AppDestinations.CHAT_ID)!!
+        Log.d(LOG_TAG, "Chat nbr -> $chatId")
+        if (chatId == _uiState.value.conversation.id)
+            refreshConversation()
+        else
+            fetchOrCreateConversation(chatId)
+
+        fetchLocalUser()
     }
 
     // UI EVENT
@@ -89,9 +104,17 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    private fun fetchLocalUser() {
+        viewModelScope.launch {
+            dataRepository.getLocalAuthor().collect{
+                _uiState.value = _uiState.value.copy(localAuthor = it)
+            }
+        }
+    }
+
     private fun fetchOrCreateConversation(id : String) {
         viewModelScope.launch {
-            val repoConversation = repository.getConversation(id)
+            val repoConversation = conversationRepository.getConversation(id)
             _uiState.value = _uiState.value.copy(
                     conversation = repoConversation
             )
@@ -100,7 +123,7 @@ class ChatViewModel @Inject constructor(
 
     private fun refreshConversation() {
         viewModelScope.launch {
-            val repoConversation = repository.getConversation(_uiState.value.conversation.id)
+            val repoConversation = conversationRepository.getConversation(_uiState.value.conversation.id)
             _uiState.value = _uiState.value.copy(
                 conversation = repoConversation
             )
@@ -109,7 +132,7 @@ class ChatViewModel @Inject constructor(
 
     private fun saveConversation(){
         viewModelScope.launch {
-            repository.saveConversation(_uiState.value.conversation)
+            conversationRepository.saveConversation(_uiState.value.conversation)
         }
     }
 
@@ -120,13 +143,17 @@ class ChatViewModel @Inject constructor(
             return
         }
         _uiState.value.conversation.messages
-            .add(Message(content = MessageContent(value = text)))
+            .add(Message(
+                content = MessageContent(value = text),
+                author = _uiState.value.localAuthor)
+            )
     }
 
     // CLEARING
     private fun clearUI(){
         saveConversation()
-        _uiState.value = ChatUIState(Conversation())
+        savedState.clearSavedStateProvider("conversationId")
+        _uiState.value = ChatUIState()
     }
 
     /**

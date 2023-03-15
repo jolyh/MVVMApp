@@ -2,7 +2,8 @@ package com.example.testmvvm.model
 
 data class Message(
     val id : String = java.util.UUID.randomUUID().toString(),
-    val author : AuthorType = AuthorType.USER,
+//    val author : AuthorType = AuthorType.USER,
+    val author : Author,
     val content : MessageContent,
     val timestamp: Long = System.currentTimeMillis()/1000,
     val status : SendingStatus = SendingStatus.SENDING

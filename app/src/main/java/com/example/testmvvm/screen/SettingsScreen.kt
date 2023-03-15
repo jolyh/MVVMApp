@@ -1,5 +1,7 @@
 package com.example.testmvvm.screen
 
+import android.graphics.drawable.shapes.Shape
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -7,18 +9,20 @@ import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Snackbar
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import com.example.testmvvm.viewModel.SettingsViewModel
 import com.example.testmvvm.viewModel.SettingsUIEvent
 import com.example.testmvvm.viewModel.SettingsUIState
-import com.example.testmvvm.model.User
 
 @Composable
 fun SettingsScreen(
@@ -27,11 +31,17 @@ fun SettingsScreen(
 
     val uiState = viewModel._uiState
 
+    val context = LocalContext.current
+
     Scaffold(
         floatingActionButton = {
             Fab {
                 viewModel.onEvent(SettingsUIEvent.SubmitUser)
-                viewModel.onEvent(SettingsUIEvent.SubmitSettings)
+                viewModel.onEvent(
+                    SettingsUIEvent.SubmitSettings
+                ) {
+                    Toast.makeText(context, "Settings Updated!", Toast.LENGTH_LONG).show()
+                }
             }
         }
     ) { it ->
@@ -60,7 +70,7 @@ fun SettingsScreen(
 fun Fab(fabOnClick : () -> Unit) {
     FloatingActionButton(onClick = { fabOnClick() }) {
         Icon(
-            imageVector = Icons.Filled.KeyboardArrowLeft,
+            imageVector = Icons.Filled.Add,
             contentDescription = "fab")
     }
 }
@@ -134,10 +144,10 @@ fun SettingsInput(
 }
 
 @Composable
-fun Content(
-    user : User,
-    fabAction: (User) -> Unit
-) {
-
-
+fun SnackbarFAB(text : String){
+    Snackbar(
+        shape = RectangleShape
+    ) {
+        Text(text = text)
+    }
 }

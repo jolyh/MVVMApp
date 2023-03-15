@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.testmvvm.data.DataRepository
-import com.example.testmvvm.model.User
+import com.example.testmvvm.model.Author
 import com.example.testmvvm.model.ZendeskSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -63,6 +63,7 @@ class SettingsViewModel @Inject constructor(
     private val LOG_TAG = "[${this.javaClass.name}]"
 
     val _uiState : MutableState<SettingsUIState> = mutableStateOf(SettingsUIState())
+    private var _userId : String = ""
 
     init {
         Log.d(LOG_TAG, "init")
@@ -71,7 +72,10 @@ class SettingsViewModel @Inject constructor(
     }
 
     // UI EVENT
-    fun onEvent(event: SettingsUIEvent) {
+    fun onEvent(
+        event: SettingsUIEvent,
+        callback: (() -> Unit) = {},
+    ) {
         when(event) {
             is SettingsUIEvent.UserNameChanged -> {
                 _uiState.value = _uiState.value.copy(
@@ -85,6 +89,7 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsUIEvent.SubmitUser -> {
                 validateUserInputs()
+                callback()
             }
             is SettingsUIEvent.ChannelKeyChanged -> {
                 _uiState.value = _uiState.value.copy(
@@ -98,6 +103,7 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsUIEvent.SubmitSettings -> {
                 validateSettingsInputs()
+                callback()
             }
             is SettingsUIEvent.ClearUIValue -> {
                 clearUIValue(event.key)
@@ -115,20 +121,24 @@ class SettingsViewModel @Inject constructor(
     }
 
     // DATASTORE USER
-    private fun saveUserData() {
+    private fun saveAuthorData() {
         Log.d(LOG_TAG, "saveUserData ${_uiState.value}")
         viewModelScope.launch {
-            repository.saveUser(
-                User(_uiState.value.userName, _uiState.value.userEmail)
+            repository.saveLocalAuthor(
+                Author(
+                    id = _userId,
+                    name = _uiState.value.userName,
+                    email = _uiState.value.userEmail)
             )
         }
     }
     private fun getUserData() {
         Log.d(LOG_TAG, "get data ")
         viewModelScope.launch {
-            val repoUser = repository.getUser().firstOrNull()
+            val repoUser = repository.getLocalAuthor().firstOrNull()
             Log.d(LOG_TAG, "get data -> " + repoUser.toString())
             if (repoUser != null) {
+                _userId = repoUser.id
                 _uiState.value = _uiState.value.copy(
                     userName = repoUser.name,
                     userEmail = repoUser.email
@@ -142,7 +152,9 @@ class SettingsViewModel @Inject constructor(
         Log.d(LOG_TAG, "saveSettingsData ${_uiState.value}")
         viewModelScope.launch {
             repository.saveZendeskSettings(
-                ZendeskSettings(_uiState.value.channelKey, _uiState.value.isPushEnabled)
+                ZendeskSettings(
+                    channelKey = _uiState.value.channelKey,
+                    isPushEnabled = _uiState.value.isPushEnabled)
             )
         }
     }
@@ -197,7 +209,7 @@ class SettingsViewModel @Inject constructor(
         if (!isNameValid || !isEmailValid) {
             Log.d(LOG_TAG, "Invalid name or email, please verify input.")
         } else {
-            saveUserData()
+            saveAuthorData()
         }
     }
 

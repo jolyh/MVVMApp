@@ -1,7 +1,6 @@
 package com.example.testmvvm.screen
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,12 +19,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key.Companion.Back
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.testmvvm.component.ComposerComposable
 import com.example.testmvvm.component.MessageComposable
-import com.example.testmvvm.component.modifier.ChatScreenModifier
+import com.example.testmvvm.model.Author
 import com.example.testmvvm.model.Conversation
 import com.example.testmvvm.ui.theme.TestMVVMTheme
 import com.example.testmvvm.viewModel.ChatUIEvent
@@ -39,33 +37,40 @@ fun ChatScreen(
     viewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
 ) {
 
-    val uiState = viewModel._uiState
+    ChatScreenContent(
+        chatUIState = viewModel._uiState,
+        onSubmitMessage = { viewModel.onEvent(ChatUIEvent.SubmitMessage) }
+    )
 
+}
+
+@Composable
+fun ChatScreenContent(
+    chatUIState: MutableState<ChatUIState>,
+    onSubmitMessage: () -> Unit
+){
     Scaffold {
         Column(Modifier.padding(it)) {
             Row(Modifier.fillMaxSize(0.92f)) {
                 ConversationComposable(
                     modifier = Modifier.padding(4.dp),
-                    uiState = uiState,
-
-                )
+                    uiState = chatUIState,
+                    )
             }
             ComposerComposable(
                 modifier = Modifier
                     .background(color = MaterialTheme.colors.secondaryVariant),
-                uiState = uiState,
+                uiState = chatUIState,
                 withAttachment = true,
             ) {
-                    Log.d("LOG_TAG", uiState.value.composerValue)
-                    viewModel.onEvent(ChatUIEvent.SubmitMessage)
-                    uiState.value = uiState.value.copy(composerValue = "")
-                }
+                Log.d("LOG_TAG", chatUIState.value.composerValue)
+                onSubmitMessage()
+                chatUIState.value = chatUIState.value.copy(composerValue = "")
             }
+        }
     }
 
-    BackHandler() {
-
-    }
+    //BackHandler() {}
 }
 
 @Composable
@@ -92,14 +97,15 @@ fun ConversationComposable(
     }
 }
 
+
 @Composable
 @Preview(
     name = "ChatScreen",
     showBackground = true
 )
-fun ConversationPreview(){
+fun ConversationPreview() {
 
-    val ui = ChatUIState(Conversation(), "", true)
+    val ui = ChatUIState(Conversation(), Author(), "", true)
     val uiState : MutableState<ChatUIState> = remember { mutableStateOf(ui) }
 
     TestMVVMTheme {

@@ -2,13 +2,11 @@ package com.example.testmvvm.component
 
 import android.R
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -20,6 +18,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.testmvvm.component.modifier.ComposerModifier
+import com.example.testmvvm.model.Author
 import com.example.testmvvm.model.Conversation
 import com.example.testmvvm.ui.theme.TestMVVMTheme
 import com.example.testmvvm.viewModel.ChatUIState
@@ -111,7 +110,7 @@ fun ComposerSendButton(
 )
 fun ComposerPreview(){
 
-    val ui = ChatUIState(Conversation(), "", true)
+    val ui = ChatUIState(Conversation(), Author(), "", true)
     val uiState : MutableState<ChatUIState> = remember { mutableStateOf(ui) }
 
     TestMVVMTheme() {
